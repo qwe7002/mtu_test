@@ -110,6 +110,3 @@ sudo ./target/release/mtu_test 192.168.1.1 --step 100
 - `pnet`: For network packet operations
 - `clap`: For command-line argument parsing
 
-## License
-
-MIT
