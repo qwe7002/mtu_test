@@ -275,20 +275,15 @@ fn test_mtu_v4(target: Ipv4Addr, size: usize, timeout_ms: u64) -> Result<bool, S
             return Ok(false); // Timeout is considered as failure
         }
 
-        // Try to receive response (use short timeout to check overall timeout)
-        match iter.next_with_timeout(Duration::from_millis(100)) {
-            Ok(Some((packet, addr))) => {
-                if packet.get_icmp_type() == IcmpTypes::EchoReply && addr == IpAddr::V4(target) {
-                    return Ok(true);
-                }
-            }
-            Ok(None) => {
-                // Timeout, continue loop
-            }
-            Err(_) => {
-                // Error, continue trying
+        // Try to receive response (non-blocking check with small sleep)
+        if let Ok((packet, addr)) = iter.next() {
+            if packet.get_icmp_type() == IcmpTypes::EchoReply && addr == IpAddr::V4(target) {
+                return Ok(true);
             }
         }
+        
+        // Small sleep to avoid busy waiting
+        std::thread::sleep(Duration::from_millis(10));
     }
 }
 
@@ -360,20 +355,15 @@ fn test_mtu_v6(target: Ipv6Addr, size: usize, timeout_ms: u64) -> Result<bool, S
             return Ok(false); // Timeout is considered as failure
         }
 
-        // Try to receive response (use short timeout to check overall timeout)
-        match iter.next_with_timeout(Duration::from_millis(100)) {
-            Ok(Some((packet, addr))) => {
-                if packet.get_icmpv6_type() == Icmpv6Types::EchoReply && addr == IpAddr::V6(target) {
-                    return Ok(true);
-                }
-            }
-            Ok(None) => {
-                // Timeout, continue loop
-            }
-            Err(_) => {
-                // Error, continue trying
+        // Try to receive response (non-blocking check with small sleep)
+        if let Ok((packet, addr)) = iter.next() {
+            if packet.get_icmpv6_type() == Icmpv6Types::EchoReply && addr == IpAddr::V6(target) {
+                return Ok(true);
             }
         }
+        
+        // Small sleep to avoid busy waiting
+        std::thread::sleep(Duration::from_millis(10));
     }
 }
 
